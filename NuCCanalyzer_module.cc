@@ -120,7 +120,6 @@ void NuCCanalyzer::FillReconstructed(art::Event const &evt)
 
   // Start filling information
   art::Ptr<recob::PFParticle> pfnu = pfneutrinos.front();
-
   // added
 
 art::ValidHandle<std::vector<recob::PFParticle> > inputPFParticle = evt.getValidHandle<std::vector<recob::PFParticle> >(inputPFLabel);
@@ -145,49 +144,6 @@ art::ValidHandle<std::vector<recob::PFParticle> > inputPFParticle = evt.getValid
        fv1zpos = float(vtx1->position().Z());
        fv2zpos = float(vtx2->position().Z());
 }
-
-
-//NEED TO REVIEW HERE
-    art::InputTag TrackInputTag(inputTracksLabel);
-    art::InputTag TrackInputTag1st(inputTracksLabel1st);
-    art::ValidHandle<std::vector<recob::Track> > Tracks1st = evt.getValidHandle<std::vector<recob::Track> >(TrackInputTag1st);
-    art::InputTag TrackInputTag2nd(inputTracksLabel2nd);
-    art::ValidHandle<std::vector<recob::Track> > Tracks2nd = evt.getValidHandle<std::vector<recob::Track> >(TrackInputTag2nd);
-    auto assocTracks = std::unique_ptr<art::FindManyP<recob::Track> >(new art::FindManyP<recob::Track>(inputPFParticle, evt, TrackInputTag));
-  
-    	if (isFromNeutrino(inputPFParticle,pfnu.key())==true){
-   
-    	const std::vector<art::Ptr<recob::Track> >& Tracks = assocTracks->at(pfnu.key());
-    		for (unsigned int iTrack = 0; iTrack < Tracks.size(); ++iTrack) {
-    		       	art::Ptr<recob::Track> ptrack = Tracks[iTrack];
-                        const recob::Track* ptrack1 = 0;
-                        const recob::Track* ptrack2 = 0;
-              		auto id = ptrack->ID();
-                        for (unsigned int iTrack1 = 0; iTrack1 < Tracks1st->size(); ++iTrack1) {
-				art::Ptr<recob::Track> ptrack1tmp(Tracks1st, iTrack1);
-				// std::cout << "ptrack1tmp->ID()=" << ptrack1tmp->ID() << " id=" << id << std::endl;
-				if (ptrack1tmp->ID()!=id) continue;
-				if (ptrack1tmp->CountValidPoints()<3) continue;
-				ptrack1 = ptrack1tmp.get();
-				break; 
-                        } 
-			for (unsigned int iTrack2 = 0; iTrack2 < Tracks2nd->size(); ++iTrack2) {
-				art::Ptr<recob::Track> ptrack2tmp(Tracks2nd, iTrack2);
-				// std::cout << "ptrack2tmp->ID()=" << ptrack2tmp->ID() << " id=" << id << std::endl;
-				if (ptrack2tmp->ID()!=id) continue;
-				if (ptrack2tmp->CountValidPoints()<3) continue;
-				ptrack2 = ptrack2tmp.get();
-                                break;
-                        }
-    			if (ptrack1!=0 || ptrack2!=0){
-    			ftk_nhits   = ptrack->NumberTrajectoryPoints();
-    			ftk1_nhits   = ptrack1->NumberTrajectoryPoints();
-    			ftk2_nhits   = ptrack2->NumberTrajectoryPoints();
-                        }
-		}
-	}
-
- // added 
 
   fNu_PDG = pfnu->PdgCode();
   fNumPrimaryDaughters = pfnu->NumDaughters();
@@ -472,7 +428,35 @@ bool NuCCanalyzer::FillDaughters(const art::Ptr<recob::PFParticle> &pfp,
         auto p6 = state_mid.parameters6D();
         it.second->assign(p6.begin(), p6.end());
       }
-    }
+    }                
+
+                        //added
+                        const recob::Track* ptrack1 = 0;
+                        const recob::Track* ptrack2 = 0; 
+                        for (unsigned int iTrack1 = 0; iTrack1 < track1handle->size(); ++iTrack1) {
+                                art::Ptr<recob::Track> ptrack1tmp(track1handle, iTrack1);
+                             
+                                if (ptrack1tmp->ID()!=id) continue;
+                                if (ptrack1tmp->CountValidPoints()<3) continue;
+                                ptrack1 = ptrack1tmp.get();
+                                break;
+                        }
+                        for (unsigned int iTrack2 = 0; iTrack2 < track2handle->size(); ++iTrack2) {
+                                art::Ptr<recob::Track> ptrack2tmp(track2handle, iTrack2);
+                               
+                                if (ptrack2tmp->ID()!=id) continue;
+                                if (ptrack2tmp->CountValidPoints()<3) continue;
+                                ptrack2 = ptrack2tmp.get();
+                                break;
+                        }
+                        if (ptrack1!=0 || ptrack2!=0){
+                        ftk_nhits   = this_track->NumberTrajectoryPoints();
+                        ftk1_nhits   = ptrack1->NumberTrajectoryPoints();
+                        ftk2_nhits   = ptrack2->NumberTrajectoryPoints();
+                        auto vtx_gpar_tk = this_track->VertexParametersGlobal6D();
+                        ftk_vtx_gpar.assign( vtx_gpar_tk.begin(), vtx_gpar_tk.end() );
+                        //added                      
+                        }
 
     // PID information:
     std::map<std::string, float> pid_map;

@@ -1,5 +1,5 @@
 ////////////////////////////////////////////////////////////////////////
-// Class:       NuCCanalyzer
+// Class:       Analyzer
 // Plugin Type: analyzer (art v2_11_03)
 // File:        NuCCanalyzer_module.cc
 //
@@ -79,7 +79,7 @@ public:
     void reconfigure(fhicl::ParameterSet const &p);
     void clearEvent();
     void clearDaughter();
-    bool isFromNeutrino(art::ValidHandle<std::vector<recob::PFParticle> > pfph, size_t ipfp);
+    bool isFromNeutrino(art::ValidHandle<std::vector<recob::PFParticle> > pfph, size_t ipfp); 
 
     /**
      *  @brief  Collect and fill the reco-truth matching information.
@@ -290,14 +290,6 @@ private:
     float fv1zpos;
     float fv2zpos;
    
-    //splittrack_studies
-    int ftk_nhits; 
-    int ftk1_nhits;
-    int ftk2_nhits; 
-    int ftk_contain; 
-    int fvx_ntks; 
-    std::vector<float> ftk_vtx_gpar;    
-
     //// Tree for every daughter
     TTree *fNueDaughtersTree;
     // Reco candidate info
@@ -369,6 +361,14 @@ private:
     float fTrueLength;
     float fTrueVxSce, fTrueVySce, fTrueVzSce;
     float fTruePx, fTruePy, fTruePz;
+    
+    //splittrack_studies
+    int ftk_nhits;
+    int ftk1_nhits;
+    int ftk2_nhits;
+    int ftk_contain;
+    int fvx_ntks;
+    std::vector<float> ftk_vtx_gpar;    
 
     //// Tree for the POT subrun info
     TTree *fSubrunTree;
@@ -415,10 +415,7 @@ NuCCanalyzer::NuCCanalyzer(fhicl::ParameterSet const &p)
     inputPFLabel(p.get<art::InputTag>("inputPFLabel","pandora")),
     inputVertexLabel1(p.get<art::InputTag>("inputVertexLabel1st")),
     inputVertexLabel2(p.get<art::InputTag>("inputVertexLabel2nd")),
-    trkprop(1.0, 0.1, 10, 10, 0.01, false),
-    inputTracksLabel(p.get<std::string>("inputTracksLabel")),
-    inputTracksLabel1st(p.get<std::string>("inputTracksLabel1st")),
-    inputTracksLabel2nd(p.get<std::string>("inputTracksLabel2nd"))
+    trkprop(1.0, 0.1, 10, 10, 0.01, false)
 
 {
 
@@ -471,13 +468,7 @@ NuCCanalyzer::NuCCanalyzer(fhicl::ParameterSet const &p)
     fEventTree->Branch("v2ypos",&fv2ypos);
     fEventTree->Branch("v1zpos",&fv1zpos);
     fEventTree->Branch("v2zpos",&fv2zpos);
-    fEventTree->Branch("tk_nhits"  , &ftk_nhits  , "tk_nhits/I"  );
-    fEventTree->Branch("tk1_nhits"  , &ftk1_nhits  , "tk1_nhits/I"  );
-    fEventTree->Branch("tk2_nhits"  , &ftk2_nhits  , "tk2_nhits/I"  );   
-    fEventTree->Branch("tk_contain", &ftk_contain, "tk_contain/I");
-    fEventTree->Branch("vx_ntks", &fvx_ntks, "vx_ntks/I"); 
-    fEventTree->Branch("tk_vtx_gpar"  , &ftk_vtx_gpar  );   
-
+    
     if (!m_isData)
     {
 
@@ -600,7 +591,13 @@ NuCCanalyzer::NuCCanalyzer(fhicl::ParameterSet const &p)
     fNueDaughtersTree->Branch("start_pitchU", &fDedxPitchU, "start_pitchU/F");
     fNueDaughtersTree->Branch("start_pitchV", &fDedxPitchV, "start_pitchV/F");
     fNueDaughtersTree->Branch("start_pitchY", &fDedxPitchY, "start_pitchY/F");
-
+    
+    fNueDaughtersTree->Branch("tk_nhits"  , &ftk_nhits  , "tk_nhits/I"  );
+    fNueDaughtersTree->Branch("tk1_nhits"  , &ftk1_nhits  , "tk1_nhits/I"  );
+    fNueDaughtersTree->Branch("tk2_nhits"  , &ftk2_nhits  , "tk2_nhits/I"  );
+    fNueDaughtersTree->Branch("tk_contain", &ftk_contain, "tk_contain/I");
+    fNueDaughtersTree->Branch("vx_ntks", &fvx_ntks, "vx_ntks/I");
+    fNueDaughtersTree->Branch("tk_vtx_gpar"  , &ftk_vtx_gpar  );
     if (!m_isData)
     {
         fNueDaughtersTree->Branch("mc_neutrino", &fMatchedNeutrino, "mc_neutrino/O");
@@ -687,13 +684,6 @@ void NuCCanalyzer::clearEvent()
    fv1zpos = 0; 
    fv2zpos = 0;                                                                  
    
-   ftk_nhits = -999; 
-   ftk1_nhits = -999; 
-   ftk2_nhits = -999; 
-   ftk_contain = -999; 
-   fvx_ntks = -999; 
-   ftk_vtx_gpar.clear();  
-
 }
 
 void NuCCanalyzer::clearDaughter()
@@ -756,6 +746,13 @@ void NuCCanalyzer::clearDaughter()
     fDedxPitchU = 0;
     fDedxPitchV = 0;
     fDedxPitchY = 0; 
+    
+    ftk_nhits = -999;
+   ftk1_nhits = -999;
+   ftk2_nhits = -999;
+   ftk_contain = -999;
+   fvx_ntks = -999;
+   ftk_vtx_gpar.clear();
 
     fSplitTrackMidPars.clear(); 
     fSplitTrack1Pars.clear(); 
