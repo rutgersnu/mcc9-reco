@@ -131,7 +131,7 @@ art::ValidHandle<std::vector<recob::PFParticle> > inputPFParticle = evt.getValid
         const std::vector<art::Ptr<recob::Vertex> >& VertexVec2 = assocVertex2->at(pfnu.key());
 
 
-        if (VertexVec1.size()==1 || VertexVec2.size()==1){ 
+        if (VertexVec1.size()==1 && VertexVec2.size()==1){ 
         auto vtx1 = VertexVec1[0];
         auto vtx2 = VertexVec2[0];
 
@@ -435,7 +435,7 @@ bool NuCCanalyzer::FillDaughters(const art::Ptr<recob::PFParticle> &pfp,
                         const recob::Track* ptrack2 = 0; 
                         for (unsigned int iTrack1 = 0; iTrack1 < track1handle->size(); ++iTrack1) {
                                 art::Ptr<recob::Track> ptrack1tmp(track1handle, iTrack1);
-                             
+                             std::cout << "DID we make it to part 1?" << std::endl; 
                                 if (ptrack1tmp->ID()!=id) continue;
                                 if (ptrack1tmp->CountValidPoints()<3) continue;
                                 ptrack1 = ptrack1tmp.get();
@@ -443,13 +443,14 @@ bool NuCCanalyzer::FillDaughters(const art::Ptr<recob::PFParticle> &pfp,
                         }
                         for (unsigned int iTrack2 = 0; iTrack2 < track2handle->size(); ++iTrack2) {
                                 art::Ptr<recob::Track> ptrack2tmp(track2handle, iTrack2);
-                               
+                               std::cout <<"Did we make it past part 2?" << std::endl; 
                                 if (ptrack2tmp->ID()!=id) continue;
                                 if (ptrack2tmp->CountValidPoints()<3) continue;
                                 ptrack2 = ptrack2tmp.get();
                                 break;
                         }
-                        if (ptrack1!=0 || ptrack2!=0){
+                        if (ptrack1!=0 && ptrack2!=0){
+			std::cout << "WE MADE IT PAST PTRACK!" << std::endl; 
                         ftk_nhits   = this_track->NumberTrajectoryPoints();
                         ftk1_nhits   = ptrack1->NumberTrajectoryPoints();
                         ftk2_nhits   = ptrack2->NumberTrajectoryPoints();

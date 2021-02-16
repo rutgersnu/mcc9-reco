@@ -747,11 +747,11 @@ void NuCCanalyzer::clearDaughter()
     fDedxPitchV = 0;
     fDedxPitchY = 0; 
     
-    ftk_nhits = -999;
-   ftk1_nhits = -999;
-   ftk2_nhits = -999;
-   ftk_contain = -999;
-   fvx_ntks = -999;
+   ftk_nhits = 0;
+   ftk1_nhits = 0;
+   ftk2_nhits = 0;
+   ftk_contain = 0;
+   fvx_ntks = 0;
    ftk_vtx_gpar.clear();
 
     fSplitTrackMidPars.clear(); 
